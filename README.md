@@ -27,9 +27,7 @@
 ## Architecture diagram
   Solution of this stack involves use of Cloud Watch Rule as `Scheduled Event` to trigger lambda code, however Cloud Watch Schedule Event shouldn't be passed to the lambda. 
 
-<p align="center">
-   ![GitHub Logo](docs/Architecture-Diagram-DNS-Resolver-Lambda.png)
-</p>  
+![GitHub Logo](docs/Architecture-Diagram-DNS-Resolver-Lambda.png)
 
 Lambda is developed to receive specific custom event which involves following details. Configuring data as part of custom event allows reuse of the lambda for various different DNS records. User is only expected to setup new Cloud Watch rule for new DNS record.
 
@@ -47,8 +45,7 @@ Lambda is developed to receive specific custom event which involves following de
 </p>
 Once Custom Event is recieved by Lambda, the very first it does is to verify its correctness. If it is not valid, it will error out.
 Once input data is verified, it resolves the IP address of DNS record provided in the request. It then pulls all of the security group rules of target rule type and filters them using rule description prefix to narrow down the scope of the rules. If resolved IP address is listed as source or destination whichever is valid in the context of rule type, it updates the rule description of corroponding rule. 
-Rule description is important element to identify & remove INACTIVE security group rule. Security rule description on security group is derived using security rule description prefix provided in the request and systems current date time value. Example - if security rule description prefix in the request is `Code Deploy US-EAST-2` and system current date time is `2019-10-27T21:23:44.847` then security rule description would be `Code Deploy US-EAST-2 - [2019-10-27T21:23:44.847]`. System date time value indicates when was the last time this IP address was resolved for source DNS. If this value is older than 24 hours then chances of resolving it to this IP in near future are very slim so can be considered as INACTIVE records. Security group rule is considered as INACTIVE if this value is older than 
-`(System current date time - purgeSgRuleCutOff (in minutes))` and can then be safely removed.
+Rule description is important element to identify & remove INACTIVE security group rule. Security rule description on security group is derived using security rule description prefix provided in the request and systems current date time value. Example - if security rule description prefix in the request is `Code Deploy US-EAST-2` and system current date time is `2019-10-27T21:23:44.847` then security rule description would be `Code Deploy US-EAST-2 - [2019-10-27T21:23:44.847]`. System date time value indicates when was the last time this IP address was resolved for source DNS. If this value is older than 24 hours (1440 minute) then chances of resolving DNS to this IP in near future are very slim so can be considered as INACTIVE records. Security group rule is considered as INACTIVE if this value is older than `(System current date time - purgeSgRuleCutOff (in minutes))` and can then be safely removed.
 
 If resolve IP address is not part of current security group rule then lambda adds new rule with the rule description in the format as stated in above.
 
@@ -73,7 +70,7 @@ If resolve IP address is not part of current security group rule then lambda add
           "purgeSgRuleCutOff": 2880
         }
 
-# IAM role required for lambda
+## IAM role required for lambda
   Lambda is not required to be executed in the VPC. Modify this IAM policy to fit into your security requirements.
   
         {
@@ -101,7 +98,7 @@ If resolve IP address is not part of current security group rule then lambda add
           ]
       }
 
-# Important points to note
-1. Prior to implementing system consuming security group which has dynamic ip problem, ensure that you have executed lambda long enough to have stable set of IP addresses on security group.
+## Important points to note
+1. Prior to implementing system consuming security group which has dynamic ip requirement, ensure that lambda has executed long enough to have stable set of IP addresses on the security group.
 2. Schedule lambda to execute more often so security groups stays up to date with changing public ip address for DNS record. Lambda is enforced to flush DNS cache after 1 minute so it would always hit the DNS server to resolve the IP address if scheduled to run after every 2 minutes or more.
-3. This write up doesn't mention of Cloud Watch Alarm on lambda failure etc. but it is recommended to follow best practices as  monitoring solution.
+3. This write up doesn't mention of Cloud Watch Alarm on lambda failure etc. but it is recommended to follow best practices of  monitoring solution which allows you to alert whenever action is required.
