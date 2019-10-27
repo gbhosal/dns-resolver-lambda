@@ -14,15 +14,17 @@
 2. At the time of writing this document, Only up to 5 security groups can be attached to EC2 server. Solution should NOT assume performing security group rules changes on
    dedicated security group. It should identify relevant security group rules associated with source DSN record.
 
-## Build
+## Build & Setup
    This java 8 based component is developed using Spring Cloud Framework which provides easy abstraction of business logic without having to worry about Cloud Provider 
    specific implementation.
    
-   To build this, Simple clone the Git repository as setup it as Maven project and finally execute below maven command to trigger the build process.
+   To build this, Simply clone the Git repository and execute below maven command to trigger the build process.
    
    > $ mvn clean package  
    
-   If you don't want to build then simply grab the binary files from the release section.
+   If you don't want to build then grab the binary files from the release section and upload it your lambda.
+   
+   This lambda code requires you to setup Environment variable `FUNCTION_NAME` = `DnsResolverFunction` to function properly.
    
 ## Architecture diagram
   Solution of this stack involves use of Cloud Watch Rule as `Scheduled Event` to trigger lambda code, however Cloud Watch Schedule Event shouldn't be passed to the lambda. 
