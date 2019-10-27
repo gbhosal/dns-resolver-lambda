@@ -26,7 +26,7 @@
    
    This lambda code requires you to setup Environment variable `FUNCTION_NAME` = `DnsResolverFunction` to function properly.
    
-## Architecture diagram
+## Architecture
   Solution of this stack involves use of Cloud Watch Rule as `Scheduled Event` to trigger lambda code, however Cloud Watch Schedule Event shouldn't be passed to the lambda. 
 
 ![GitHub Logo](docs/Architecture-Diagram-DNS-Resolver-Lambda.png)
