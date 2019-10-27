@@ -72,7 +72,7 @@ If resolve IP address is not part of current security group rule then lambda add
           "purgeSgRuleCutOff": 2880
         }
 
-## IAM role required for lambda
+## IAM policy requirement of Lambda execution role
   Lambda is not required to be executed in the VPC. Modify this IAM policy to fit into your security requirements.
   
         {
