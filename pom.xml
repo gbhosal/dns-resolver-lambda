@@ -8,7 +8,7 @@
 	</parent>  
   <groupId>com.dns-resolver</groupId>
   <artifactId>dns-resolver-lambda</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <name>dns-resolver-lambda</name>
   <description>Resolves DNS and updates egress rules on the security group provided in the request</description>
 	<properties>
