@@ -204,19 +204,21 @@ public class DnsResolverFunction implements Function<DnsResolverInput, String> {
 		// Identify INACTIVE rules and delete them
 		rulesOnSecurityGroup.stream().forEach(rule -> {
 			List<IpRange> ipRangeResultList = new ArrayList<>();
-			rule.getIpv4Ranges().forEach(ipv4Range -> {
-				String regexPattern = String.format("(%s - )\\[(.*)\\]", dnsResolverInput.getRuleDescriptionPrefix());
-				Pattern pattern = Pattern.compile(regexPattern);
-				Matcher matcher = pattern.matcher(ipv4Range.getDescription());
-				LocalDateTime cutOfflocalDateTime = LocalDateTime.now()
-						.minusMinutes(dnsResolverInput.getPurgeSgRuleCutOff());
-				if (matcher.matches()) {
-					LocalDateTime timestampOnRuleDesc = LocalDateTime.parse(matcher.group(2));
-					if (timestampOnRuleDesc.isBefore(cutOfflocalDateTime)) {
-						ipRangeResultList.add(ipv4Range);
-					}
-				}
-			});
+			rule.getIpv4Ranges().stream().filter(ipv4Range -> !StringUtils.isEmpty(ipv4Range.getDescription()))
+					.forEach(ipv4Range -> {
+						String regexPattern = String.format("(%s - )\\[(.*)\\]",
+								dnsResolverInput.getRuleDescriptionPrefix());
+						Pattern pattern = Pattern.compile(regexPattern);
+						Matcher matcher = pattern.matcher(ipv4Range.getDescription());
+						LocalDateTime cutOfflocalDateTime = LocalDateTime.now()
+								.minusMinutes(dnsResolverInput.getPurgeSgRuleCutOff());
+						if (matcher.matches()) {
+							LocalDateTime timestampOnRuleDesc = LocalDateTime.parse(matcher.group(2));
+							if (timestampOnRuleDesc.isBefore(cutOfflocalDateTime)) {
+								ipRangeResultList.add(ipv4Range);
+							}
+						}
+					});
 			
 			// is at least one rule identified for the deletion?
 			if (!CollectionUtils.isEmpty(ipRangeResultList)) {
